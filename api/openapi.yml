@@ -20,6 +20,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "ob.1"
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
@@ -155,6 +156,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "cc.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -262,6 +264,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "cl.1"
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
@@ -328,6 +331,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "ci.1"
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
@@ -394,6 +398,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "pc.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -501,6 +506,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "to.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -559,6 +565,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "ti.1"
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -615,6 +622,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "cm.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -691,6 +699,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "sm.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -767,6 +776,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "py.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -868,6 +878,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "pj.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
@@ -964,6 +975,7 @@ paths:
           required: true
           schema:
             type: string
+          example: "rf.1"
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
