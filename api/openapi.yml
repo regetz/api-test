@@ -10,7 +10,7 @@ servers:
 paths:
   /plot-observations/{vb_code}:
     get:
-      summary: returns a specific plot observation via its identifier
+      summary: Get a plot observation via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -45,7 +45,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /plot-observations:
     get:
-      summary: returns all plot observations in paginated format.
+      summary: Get multiple plot observations
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/detail'
@@ -123,7 +123,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post:
-      summary: takes a list of plot/observation objects and inserts them into the database.
+      summary: Upload plot observations
       x-status: "beta"
       requestBody:
         content:
@@ -145,7 +145,7 @@ paths:
 
   /community-concepts/{vb_code}:
     get:
-      summary: returns a specific community concept via its identifier
+      summary: Get a community concept via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -173,7 +173,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /community-concepts:
     get:
-      summary: returns all community concepts in paginated format.
+      summary: Get multiple community concepts
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/with_nested'
@@ -230,7 +230,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post: #TODO
-      summary: takes a list of community concepts and adds them to the database, then returns their new accession codes.
+      summary: Upload community concepts
       x-status: "planned"
       requestBody:
         content:
@@ -252,7 +252,7 @@ paths:
 
   /community-classifications/{vb_code}:
     get:
-      summary: returns a specific community classification via its identifier
+      summary: Get a community classification via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -285,7 +285,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /community-classifications:
     get:
-      summary: returns a collection of community classes in paginated format
+      summary: Get multiple community classifications
       parameters:
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
@@ -318,7 +318,7 @@ paths:
 
   /community-interpretations/{vb_code}:
     get:
-      summary: returns a specific community interpretation via its identifier
+      summary: Get a community interpretation via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -351,7 +351,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /community-interpretations:
     get:
-      summary: returns a collection of community interpretations in paginated format
+      summary: Get multiple community interpretations
       parameters:
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
@@ -384,7 +384,7 @@ paths:
 
   /plant-concepts/{vb_code}:
     get:
-      summary: returns a specific plant concept via its identifier
+      summary: Get a plant concept via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -412,7 +412,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /plant-concepts:
     get:
-      summary: returns all plant concepts in paginated format.
+      summary: Get multiple plant concepts
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/with_nested'
@@ -469,7 +469,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post: #TODO
-      summary: takes a list of plant concepts and adds them to the database, then returns their new accession codes.
+      summary: Upload plant concepts
       x-status: "planned"
       requestBody:
         content:
@@ -491,7 +491,7 @@ paths:
 
   /taxon-observations/{vb_code}:
     get:
-      summary: returns a specific taxon observation via its identifier
+      summary: Get a taxon observation via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -521,7 +521,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /taxon-observations:
     get:
-      summary: returns a collection of taxon observations paginated format
+      summary: Get multiple taxon observations
       parameters:
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/limit'
@@ -549,7 +549,7 @@ paths:
 
   /taxon-interpretations/{vb_code}:
     get:
-      summary: returns a specific taxon interpretation via its identifier
+      summary: Get a taxon interpretation via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -577,7 +577,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /taxon-interpretations:
     get:
-      summary: returns a collection of taxon interpretations in paginated format
+      summary: Get multiple taxon interpretations
       parameters:
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/limit'
@@ -605,7 +605,7 @@ paths:
 
   /cover-methods/{vb_code}:
     get:
-      summary: returns a specific cover method via its identifier
+      summary: Get a cover method via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -633,7 +633,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /cover-methods:
     get:
-      summary: returns all cover methods in paginated format.
+      summary: Get multiple cover methods
       parameters:
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/limit'
@@ -659,7 +659,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post: #TODO
-      summary: takes a list of cover methods and adds them to the database, then returns their new accession codes.
+      summary: Upload cover methods
       x-status: "beta"
       requestBody:
         content:
@@ -681,7 +681,7 @@ paths:
 
   /stratum-methods/{vb_code}:
     get:
-      summary: returns a specific stratum method via its identifier
+      summary: Get a stratum method via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -709,7 +709,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /stratum-methods:
     get:
-      summary: returns all stratum methods in paginated format.
+      summary: Get multiple stratum methods
       parameters:
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/limit'
@@ -735,7 +735,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post:
-      summary: takes a list of stratum methods and adds them to the database, then returns their new accession codes.
+      summary: Upload stratum methods
       x-status: "beta"
       requestBody:
         content:
@@ -757,7 +757,7 @@ paths:
 
   /parties/{vb_code}:
     get:
-      summary: returns a specific party via its identifier
+      summary: Get a party via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -781,7 +781,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /parties:
     get:
-      summary: returns all parties in paginated format.
+      summary: Get multiple parties
       parameters:
         - $ref: '#/components/parameters/search'
         - name: sort
@@ -836,7 +836,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post: #TODO
-      summary: takes a list of parties and adds them to the database, then returns their new accession codes.
+      summary: Upload parties
       x-status: "beta"
       requestBody:
         content:
@@ -858,7 +858,7 @@ paths:
 
   /projects/{vb_code}:
     get:
-      summary: returns a specific project via its identifier
+      summary: Get a project via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -881,7 +881,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /projects:
     get:
-      summary: returns all projects in paginated format.
+      summary: Get multiple projects
       parameters:
         - $ref: '#/components/parameters/search'
         - name: sort
@@ -932,7 +932,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post: #TODO
-      summary: takes a list of projects and adds them to the database, then returns their new accession codes.
+      summary: Upload projects
       x-status: "planned"
       requestBody:
         content:
@@ -954,7 +954,7 @@ paths:
 
   /references/{vb_code}:
     get:
-      summary: returns a specific reference via its identifier
+      summary: Get a reference via its identifier
       parameters:
         - name: vb_code
           in: path
@@ -977,7 +977,7 @@ paths:
                 description: Parquet file with same data as the JSON response.
   /references:
     get:
-      summary: returns all references in paginated format.
+      summary: Get multiple references
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/limit'
@@ -998,7 +998,7 @@ paths:
                 format: binary
                 description: Parquet file with same data as the JSON response.
     post: #TODO
-      summary: takes a list of references and adds them to the database, then returns their new accession codes.
+      summary: Upload references
       x-status: "planned"
       requestBody:
         content:
