@@ -4,129 +4,288 @@ info:
   version: '2.0.0-beta'
   license:
     name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0
 servers:
   - url: https://api.vegbank.org
     description: VegBank Production API
   - url: https://api-dev.vegbank.org
     description: VegBank Development API
 security: []
+
+tags:
+- name: Plot observations
+  description: Operations related to plot observations
+- name: Community concepts
+  description: Operations related to community concepts
+- name: Community classifications
+  description: Operations related to community classifications
+- name: Community interpretations
+  description: Operations related to community interpretations
+- name: Plant concepts
+  description: Operations related to plant concepts
+- name: Taxon observations
+  description: Operations related to taxon observations
+- name: Taxon interpretations
+  description: Operations related to taxon interpretations
+- name: Cover methods
+  description: Operations related to cover methods
+- name: Stratum methods
+  description: Operations related to stratum methods
+- name: Parties
+  description: Operations related to parties
+- name: Projects
+  description: Operations related to projects
+- name: References
+  description: Operations related to references
+
 paths:
-  /plot-observations/{vb_code}:
+  /plot-observations/{ob_code}:
     get:
-      summary: Get a plot observation via its identifier
+      tags:
+        - Plot observations
+      operationId: get-ob-by-id
+      summary: Get plot observation
+      description: >
+        Retrieve a single plot observation using its `ob_code`, which
+        take the form `ob.<number>`.
       parameters:
-        - name: vb_code
+        - name: ob_code
           in: path
           required: true
           schema:
             type: string
           example: "ob.1"
-        - $ref: '#/components/parameters/detail'
+        - $ref: '#/components/parameters/detail_ob'
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single plot observation. Record structure varies based on parameters:
-            - `detail=geo`: Name, identifier, and lat/lon fields only
-            - `detail=minimal&with_nested=false`: Basic fields only
-            - `detail=minimal&with_nested=true`: Basic fields + nested array fields
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/plot_obs_geo'
-                  - $ref: '#/components/schemas/plot_obs_minimal'
-                  - $ref: '#/components/schemas/plot_obs_minimal_nested'
-                  - $ref: '#/components/schemas/plot_obs_full'
-                  - $ref: '#/components/schemas/plot_obs_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
-  /plot-observations:
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /projects/{pj_code}/plot-observations:
     get:
-      summary: Get multiple plot observations
+      tags:
+        - Plot observations
+      operationId: get-ob-by-pj
+      summary: Get plot observations by project
+      description: >
+        Retrieve a paginated and sorted collection of plot observations,
+        either representing all plot observations associated with the
+        specified project (using its `pj_code`), or a subset thereof
+        based on a specified `search` query.
       parameters:
-        - $ref: '#/components/parameters/search'
-        - $ref: '#/components/parameters/detail'
-        - $ref: '#/components/parameters/with_nested'
-        - name: sort
-          in: query
-          required: false
-          description: |
-            Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
-            Ascending order is the default if no prefix is provided.
-
-            Available sort fields:
-            - `default` - Default sort order
-            - `author_obs_code` - Sort by the author-provided plot observation code
-
-            Examples:
-            - `sort=author_obs_code` - Sort by observation code ascending
-            - `sort=-author_obs_code` - Sort by observation code descending
+        - name: pj_code
+          in: path
+          required: true
           schema:
             type: string
-            enum:
-              - default
-              - +default
-              - -default
-              - author_obs_code
-              - +author_obs_code
-              - -author_obs_code
-            default: default
-          example: -author_obs_code
+          example: "pj.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail_ob'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_ob'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
-        - name: num_taxa
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            default: 5
-          description: |
-            Number of taxa to return per plot observation. Sort order depends on detail level:
-            - With `detail=minimal`: Descending order by max cover
-            - With `detail=full`: Alphabetical order by plant name
-        - name: num_comms
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            default: 5
-          description: Number of communities to return per plot observation, ordered by commclass_id
+        - $ref: '#/components/parameters/num_taxa_ob'
+        - $ref: '#/components/parameters/num_comms_ob'
       responses:
         '200':
-          description: |
-            Returns array of plot observations. Record structure varies based on parameters:
-            - `detail=geo`: Name, identifier, and lat/lon fields only
-            - `detail=minimal&with_nested=false`: Basic fields only
-            - `detail=minimal&with_nested=true`: Basic fields + nested array fields
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/plot_obs_geo'
-                    - $ref: '#/components/schemas/plot_obs_minimal'
-                    - $ref: '#/components/schemas/plot_obs_minimal_nested'
-                    - $ref: '#/components/schemas/plot_obs_full'
-                    - $ref: '#/components/schemas/plot_obs_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /parties/{py_code}/plot-observations:
+    get:
+      tags:
+        - Plot observations
+      operationId: get-ob-by-py
+      summary: Get plot observations by party
+      description: >
+        Retrieve a paginated and sorted collection of plot observations,
+        either representing all plot observations associated with the
+        specified party (using its `py_code`), or a subset thereof
+        based on a specified `search` query.
+      parameters:
+        - name: py_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "py.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail_ob'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_ob'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+        - $ref: '#/components/parameters/num_taxa_ob'
+        - $ref: '#/components/parameters/num_comms_ob'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plant-concepts/{pc_code}/plot-observations:
+    get:
+      tags:
+        - Plot observations
+      operationId: get-ob-by-pc
+      summary: Get plot observations by plant concept
+      description: >
+        Retrieve a paginated and sorted collection of plot observations,
+        either representing all plot observations with taxon
+        observations interpreted to the specified plant concept (using
+        its `pc_code`), or a subset thereof based on a specified
+        `search` query.
+      parameters:
+        - name: pc_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "pc.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail_ob'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_ob'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+        - $ref: '#/components/parameters/num_taxa_ob'
+        - $ref: '#/components/parameters/num_comms_ob'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /community-concepts/{cc_code}/plot-observations:
+    get:
+      tags:
+        - Plot observations
+      operationId: get-ob-by-cc
+      summary: Get plot observations by community concept
+      description: >
+        Retrieve a paginated and sorted collection of plot observations,
+        either representing all plot observations with taxon
+        observations interpreted to the specified community concept (using
+        its `cc_code`), or a subset thereof based on a specified
+        `search` query.
+      parameters:
+        - name: cc_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "cc.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail_ob'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_ob'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+        - $ref: '#/components/parameters/num_taxa_ob'
+        - $ref: '#/components/parameters/num_comms_ob'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /cover-methods/{cm_code}/plot-observations:
+    get:
+      tags:
+        - Plot observations
+      operationId: get-ob-by-cm
+      summary: Get plot observations by cover method
+      description: >
+        Retrieve a paginated and sorted collection of plot observations,
+        either representing all plot observations using the specified
+        cover method (using its `cm_code`), or a subset thereof based on
+        a specified `search` query.
+      parameters:
+        - name: cm_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "cm.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail_ob'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_ob'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+        - $ref: '#/components/parameters/num_taxa_ob'
+        - $ref: '#/components/parameters/num_comms_ob'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /stratum-methods/{sm_code}/plot-observations:
+    get:
+      tags:
+        - Plot observations
+      operationId: get-ob-by-sm
+      summary: Get plot observations by stratum method
+      description: >
+        Retrieve a paginated and sorted collection of plot observations,
+        either representing all plot observations using the specified
+        stratum method (using its `sm_code`), or a subset thereof based on
+        a specified `search` query.
+      parameters:
+        - name: sm_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "sm.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail_ob'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_ob'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+        - $ref: '#/components/parameters/num_taxa_ob'
+        - $ref: '#/components/parameters/num_comms_ob'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plot-observations:
+    get:
+      tags:
+        - Plot observations
+      operationId: get-ob
+      summary: Get all plot observations
+      description: >
+        Retrieve a paginated and sorted collection of plot observations,
+        either representing all plot observations in VegBank, or a subset
+        thereof based on a specified `search` query.
+      parameters:
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail_ob'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_ob'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+        - $ref: '#/components/parameters/num_taxa_ob'
+        - $ref: '#/components/parameters/num_comms_ob'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlotObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post:
+      tags:
+        - Plot observations
+      operationId: upload-ob
       summary: Upload plot observations
       x-status: "beta"
       requestBody:
@@ -146,9 +305,16 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
   /community-concepts/{vb_code}:
     get:
+      tags:
+        - Community concepts
+      operationId: get-cc-by-id
       summary: Get a community concept via its identifier
       parameters:
         - name: vb_code
@@ -161,80 +327,31 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single community concept. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/comm_concept_full'
-                  - $ref: '#/components/schemas/comm_concept_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CommunityConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /community-concepts:
     get:
+      tags:
+        - Community concepts
+      operationId: get-cc
       summary: Get multiple community concepts
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/with_nested'
-        - name: sort
-          in: query
-          required: false
-          description: |
-            Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
-            Ascending order is the default if no prefix is provided.
-
-            Available sort fields:
-            - `default` - Default sort order
-            - `comm_name` - Sort by community name
-            - `obs_count` - Sort by observation count
-
-            Examples:
-            - `sort=comm_name` - Sort by community name ascending
-            - `sort=-obs_count` - Sort by observation count descending
-            - `sort=+comm_name` - Sort by community name ascending (explicit)
-          schema:
-            type: string
-            enum:
-              - default
-              - +default
-              - -default
-              - comm_name
-              - +comm_name
-              - -comm_name
-              - obs_count
-              - +obs_count
-              - -obs_count
-            default: default
-          example: -obs_count
+        - $ref: '#/components/parameters/sort_cc'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of community concepts. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/comm_concept_full'
-                    - $ref: '#/components/schemas/comm_concept_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CommunityConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post: #TODO
+      tags:
+        - Community concepts
+      operationId: upload-cc
       summary: Upload community concepts
       x-status: "planned"
       requestBody:
@@ -254,9 +371,16 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
   /community-classifications/{vb_code}:
     get:
+      tags:
+        - Community classifications
+      operationId: get-cl-by-id
       summary: Get a community classification via its identifier
       parameters:
         - name: vb_code
@@ -270,27 +394,14 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single community classification. Record structure varies based on parameters:
-            - `detail=minimal&with_nested=false`: Basic fields only
-            - `detail=minimal&with_nested=true`: Basic fields + nested array fields
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/comm_class_minimal'
-                  - $ref: '#/components/schemas/comm_class_minimal_nested'
-                  - $ref: '#/components/schemas/comm_class_full'
-                  - $ref: '#/components/schemas/comm_class_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CommunityClassifications"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /community-classifications:
     get:
+      tags:
+        - Community classifications
+      operationId: get-cl
       summary: Get multiple community classifications
       parameters:
         - $ref: '#/components/parameters/detail'
@@ -300,30 +411,15 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of community classifications. Record structure varies based on parameters:
-            - `detail=minimal&with_nested=false`: Basic fields only
-            - `detail=minimal&with_nested=true`: Basic fields + nested array fields
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/comm_class_minimal'
-                    - $ref: '#/components/schemas/comm_class_minimal_nested'
-                    - $ref: '#/components/schemas/comm_class_full'
-                    - $ref: '#/components/schemas/comm_class_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CommunityClassifications"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
 
   /community-interpretations/{vb_code}:
     get:
+      tags:
+        - Community interpretations
+      operationId: get-ci-by-id
       summary: Get a community interpretation via its identifier
       parameters:
         - name: vb_code
@@ -337,27 +433,14 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single community interpretation. Record structure varies based on parameters:
-            - `detail=minimal&with_nested=false`: Basic fields only
-            - `detail=minimal&with_nested=true`: Basic fields + nested array fields
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/comm_interp_minimal'
-                  - $ref: '#/components/schemas/comm_interp_minimal_nested'
-                  - $ref: '#/components/schemas/comm_interp_full'
-                  - $ref: '#/components/schemas/comm_interp_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CommunityInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /community-interpretations:
     get:
+      tags:
+        - Community interpretations
+      operationId: get-ci
       summary: Get multiple community interpretations
       parameters:
         - $ref: '#/components/parameters/detail'
@@ -367,30 +450,15 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of community interpretations. Record structure varies based on parameters:
-            - `detail=minimal&with_nested=false`: Basic fields only
-            - `detail=minimal&with_nested=true`: Basic fields + nested array fields
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/comm_interp_minimal'
-                    - $ref: '#/components/schemas/comm_interp_minimal_nested'
-                    - $ref: '#/components/schemas/comm_interp_full'
-                    - $ref: '#/components/schemas/comm_interp_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CommunityInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
 
   /plant-concepts/{vb_code}:
     get:
+      tags:
+        - Plant concepts
+      operationId: get-pc-by-id
       summary: Get a plant concept via its identifier
       parameters:
         - name: vb_code
@@ -403,80 +471,31 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single plant concept. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/plant_concept_full'
-                  - $ref: '#/components/schemas/plant_concept_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/PlantConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /plant-concepts:
     get:
+      tags:
+        - Plant concepts
+      operationId: get-pc
       summary: Get multiple plant concepts
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/with_nested'
-        - name: sort
-          in: query
-          required: false
-          description: |
-            Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
-            Ascending order is the default if no prefix is provided.
-
-            Available sort fields:
-            - `default` - Default sort order
-            - `plant_name` - Sort by plant name
-            - `obs_count` - Sort by observation count
-
-            Examples:
-            - `sort=plant_name` - Sort by plant name ascending
-            - `sort=-obs_count` - Sort by observation count descending
-            - `sort=+plant_name` - Sort by plant name ascending (explicit)
-          schema:
-            type: string
-            enum:
-              - default
-              - +default
-              - -default
-              - plant_name
-              - +plant_name
-              - -plant_name
-              - obs_count
-              - +obs_count
-              - -obs_count
-            default: default
-          example: -obs_count
+        - $ref: '#/components/parameters/sort_pc'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of plant concepts. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/plant_concept_full'
-                    - $ref: '#/components/schemas/plant_concept_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/PlantConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post: #TODO
+      tags:
+        - Plant concepts
+      operationId: upload-pc
       summary: Upload plant concepts
       x-status: "planned"
       requestBody:
@@ -496,9 +515,16 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
   /taxon-observations/{vb_code}:
     get:
+      tags:
+        - Taxon observations
+      operationId: get-to-by-id
       summary: Get a taxon observation via its identifier
       parameters:
         - name: vb_code
@@ -511,25 +537,14 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single taxon observation. Record structure varies based on parameters:
-            - `detail=minimal&with_nested=false`: Basic fields only
-            - `detail=minimal&with_nested=true`: Basic fields + nested array fields
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/taxon_obs_full'
-                  - $ref: '#/components/schemas/taxon_obs_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/TaxonObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /taxon-observations:
     get:
+      tags:
+        - Taxon observations
+      operationId: get-to
       summary: Get multiple taxon observations
       parameters:
         - $ref: '#/components/parameters/with_nested'
@@ -538,26 +553,15 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of taxon observations. Record structure varies based on parameters:
-            - `with_nested=false`: No nested array fields
-            - `with_nested=true`: Include nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/taxon_obs_full'
-                    - $ref: '#/components/schemas/taxon_obs_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/TaxonObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
 
   /taxon-interpretations/{vb_code}:
     get:
+      tags:
+        - Taxon interpretations
+      operationId: get-ti-by-id
       summary: Get a taxon interpretation via its identifier
       parameters:
         - name: vb_code
@@ -570,23 +574,14 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single taxon interpretation. Record structure varies based on parameters:
-            - `detail=minimal`: Basic fields only
-            - `detail=full`: Extended fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/taxon_interp_minimal'
-                  - $ref: '#/components/schemas/taxon_interp_full'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/TaxonInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /taxon-interpretations:
     get:
+      tags:
+        - Taxon interpretations
+      operationId: get-ti
       summary: Get multiple taxon interpretations
       parameters:
         - $ref: '#/components/parameters/detail'
@@ -595,26 +590,15 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of taxon interpretations. Record structure varies based on parameters:
-            - `detail=minimal`: Basic fields only
-            - `detail=full`: Extended fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/taxon_interp_minimal'
-                    - $ref: '#/components/schemas/taxon_interp_full'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/TaxonInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
 
   /cover-methods/{vb_code}:
     get:
+      tags:
+        - Cover methods
+      operationId: get-cm-by-id
       summary: Get a cover method via its identifier
       parameters:
         - name: vb_code
@@ -627,23 +611,14 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single cover method. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/cover_method_full'
-                  - $ref: '#/components/schemas/cover_method_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CoverMethods"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /cover-methods:
     get:
+      tags:
+        - Cover methods
+      operationId: get-cm
       summary: Get multiple cover methods
       parameters:
         - $ref: '#/components/parameters/with_nested'
@@ -652,24 +627,13 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of cover methods. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/cover_method_full'
-                    - $ref: '#/components/schemas/cover_method_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/CoverMethods"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post: #TODO
+      tags:
+        - Cover methods
+      operationId: upload-cm
       summary: Upload cover methods
       x-status: "beta"
       requestBody:
@@ -689,9 +653,16 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
   /stratum-methods/{vb_code}:
     get:
+      tags:
+        - Stratum methods
+      operationId: get-sm-by-id
       summary: Get a stratum method via its identifier
       parameters:
         - name: vb_code
@@ -704,23 +675,14 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns a single stratum method. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/stratum_method_full'
-                  - $ref: '#/components/schemas/stratum_method_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/StratumMethods"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /stratum-methods:
     get:
+      tags:
+        - Stratum methods
+      operationId: get-sm
       summary: Get multiple stratum methods
       parameters:
         - $ref: '#/components/parameters/with_nested'
@@ -729,24 +691,13 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: |
-            Returns array of stratum methods. Record structure varies based on parameters:
-            - `detail=full&with_nested=false`: Extended fields, no nested array fields
-            - `detail=full&with_nested=true`: Extended fields + nested array fields
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/stratum_method_full'
-                    - $ref: '#/components/schemas/stratum_method_full_nested'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/StratumMethods"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post:
+      tags:
+        - Stratum methods
+      operationId: upload-sm
       summary: Upload stratum methods
       x-status: "beta"
       requestBody:
@@ -766,9 +717,16 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
   /parties/{vb_code}:
     get:
+      tags:
+        - Parties
+      operationId: get-py-by-id
       summary: Get a party via its identifier
       parameters:
         - name: vb_code
@@ -777,78 +735,33 @@ paths:
           schema:
             type: string
           example: "py.1"
-        - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: Returns a single party
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/party'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/Parties"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /parties:
     get:
+      tags:
+        - Parties
+      operationId: get-py
       summary: Get multiple parties
       parameters:
         - $ref: '#/components/parameters/search'
-        - name: sort
-          in: query
-          required: false
-          description: |
-            Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
-            Ascending order is the default if no prefix is provided.
-
-            Available sort fields:
-            - `default` - Default sort order
-            - `surname` - Sort by surname
-            - `organization_name` - Sort by organization name
-            - `obs_count` - Sort by observation count
-
-            Examples:
-            - `sort=surname` - Sort by surname ascending
-            - `sort=-obs_count` - Sort by observation count descending
-            - `sort=+organization_name` - Sort by organization name ascending (explicit)
-          schema:
-            type: string
-            enum:
-              - default
-              - +default
-              - -default
-              - surname
-              - +surname
-              - -surname
-              - organization_name
-              - +organization_name
-              - -organization_name
-              - obs_count
-              - +obs_count
-              - -obs_count
-            default: default
-          example: -obs_count
+        - $ref: '#/components/parameters/sort_py'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: Returns array of parties
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/party'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/Parties"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post: #TODO
+      tags:
+        - Parties
+      operationId: upload-py
       summary: Upload parties
       x-status: "beta"
       requestBody:
@@ -868,9 +781,16 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
   /projects/{vb_code}:
     get:
+      tags:
+        - Projects
+      operationId: get-pj-by-id
       summary: Get a project via its identifier
       parameters:
         - name: vb_code
@@ -883,69 +803,30 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: Returns a single projects
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/project'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/Projects"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /projects:
     get:
+      tags:
+        - Projects
+      operationId: get-pj
       summary: Get multiple projects
       parameters:
         - $ref: '#/components/parameters/search'
-        - name: sort
-          in: query
-          required: false
-          description: |
-            Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
-            Ascending order is the default if no prefix is provided.
-
-            Available sort fields:
-            - `default` - Default sort order
-            - `project_name` - Sort by project name
-            - `obs_count` - Sort by observation count
-
-            Examples:
-            - `sort=project_name` - Sort by project name ascending
-            - `sort=-obs_count` - Sort by observation count descending
-            - `sort=+project_name` - Sort by project name ascending (explicit)
-          schema:
-            type: string
-            enum:
-              - default
-              - +default
-              - -default
-              - project_name
-              - +project_name
-              - -project_name
-              - obs_count
-              - +obs_count
-              - -obs_count
-            default: default
-          example: -obs_count
+        - $ref: '#/components/parameters/sort_pj'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: Returns array of projects
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/project'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/Projects"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post: #TODO
+      tags:
+        - Projects
+      operationId: upload-pj
       summary: Upload projects
       x-status: "planned"
       requestBody:
@@ -965,9 +846,16 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
   /references/{vb_code}:
     get:
+      tags:
+        - References
+      operationId: get-rf-by-id
       summary: Get a reference via its identifier
       parameters:
         - name: vb_code
@@ -980,18 +868,14 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: Returns a single references
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/reference'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/References"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /references:
     get:
+      tags:
+        - References
+      operationId: get-rf
       summary: Get multiple references
       parameters:
         - $ref: '#/components/parameters/search'
@@ -1000,19 +884,13 @@ paths:
         - $ref: '#/components/parameters/create_parquet'
       responses:
         '200':
-          description: Returns array of references
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/reference'
-            application/vnd.apache.parquet:
-              schema:
-                type: string
-                format: binary
-                description: Parquet file with same data as the JSON response.
+          $ref: "#/components/responses/References"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
     post: #TODO
+      tags:
+        - References
+      operationId: upload-rf
       summary: Upload references
       x-status: "planned"
       requestBody:
@@ -1032,6 +910,10 @@ paths:
                 items:
                   type: string
                   description: accession codes for the new created records
+        '403':
+          $ref: "#/components/responses/UploadsNotAllowed"
+        '500':
+          $ref: "#/components/responses/InvalidDataUpload"
 
 components:
   parameters:
@@ -1052,6 +934,19 @@ components:
         default: full
       description: |
         Level of detail for the response:
+        - `minimal`: Returns basic fields only
+        - `full`: Returns more fields
+    detail_ob:
+      name: detail
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [geo, minimal, full]
+        default: full
+      description: |
+        Level of detail for the response:
+        - `geo`: Returns core location fields only
         - `minimal`: Returns basic fields only
         - `full`: Returns more fields
     with_nested:
@@ -1088,8 +983,444 @@ components:
         type: boolean
         default: false
       description: If true, return data payload in binary Parquet format
+    sort_ob:
+      name: sort
+      in: query
+      required: false
+      description: |
+        Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
+        Ascending order is the default if no prefix is provided.
+
+        Available sort fields:
+        - `default` - Default sort order
+        - `author_obs_code` - Sort by the author-provided plot observation code
+
+        Examples:
+        - `sort=author_obs_code` - Sort by observation code ascending
+        - `sort=-author_obs_code` - Sort by observation code descending
+      schema:
+        type: string
+        enum:
+          - default
+          - +default
+          - -default
+          - author_obs_code
+          - +author_obs_code
+          - -author_obs_code
+        default: default
+      example: -author_obs_code
+    sort_cc:
+      name: sort
+      in: query
+      required: false
+      description: |
+        Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
+        Ascending order is the default if no prefix is provided.
+
+        Available sort fields:
+        - `default` - Default sort order
+        - `comm_name` - Sort by community name
+        - `obs_count` - Sort by observation count
+
+        Examples:
+        - `sort=comm_name` - Sort by community name ascending
+        - `sort=-obs_count` - Sort by observation count descending
+        - `sort=+comm_name` - Sort by community name ascending (explicit)
+      schema:
+        type: string
+        enum:
+          - default
+          - +default
+          - -default
+          - comm_name
+          - +comm_name
+          - -comm_name
+          - obs_count
+          - +obs_count
+          - -obs_count
+        default: default
+      example: -obs_count
+    sort_pc:
+      name: sort
+      in: query
+      required: false
+      description: |
+        Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
+        Ascending order is the default if no prefix is provided.
+
+        Available sort fields:
+        - `default` - Default sort order
+        - `plant_name` - Sort by plant name
+        - `obs_count` - Sort by observation count
+
+        Examples:
+        - `sort=plant_name` - Sort by plant name ascending
+        - `sort=-obs_count` - Sort by observation count descending
+        - `sort=+plant_name` - Sort by plant name ascending (explicit)
+      schema:
+        type: string
+        enum:
+          - default
+          - +default
+          - -default
+          - plant_name
+          - +plant_name
+          - -plant_name
+          - obs_count
+          - +obs_count
+          - -obs_count
+        default: default
+      example: -obs_count
+    sort_py:
+      name: sort
+      in: query
+      required: false
+      description: |
+        Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
+        Ascending order is the default if no prefix is provided.
+
+        Available sort fields:
+        - `default` - Default sort order
+        - `surname` - Sort by surname
+        - `organization_name` - Sort by organization name
+        - `obs_count` - Sort by observation count
+
+        Examples:
+        - `sort=surname` - Sort by surname ascending
+        - `sort=-obs_count` - Sort by observation count descending
+        - `sort=+organization_name` - Sort by organization name ascending (explicit)
+      schema:
+        type: string
+        enum:
+          - default
+          - +default
+          - -default
+          - surname
+          - +surname
+          - -surname
+          - organization_name
+          - +organization_name
+          - -organization_name
+          - obs_count
+          - +obs_count
+          - -obs_count
+        default: default
+      example: -obs_count
+    sort_pj:
+      name: sort
+      in: query
+      required: false
+      description: |
+        Sort order for results. Prefix with `-` for descending order or `+` for ascending order.
+        Ascending order is the default if no prefix is provided.
+
+        Available sort fields:
+        - `default` - Default sort order
+        - `project_name` - Sort by project name
+        - `obs_count` - Sort by observation count
+
+        Examples:
+        - `sort=project_name` - Sort by project name ascending
+        - `sort=-obs_count` - Sort by observation count descending
+        - `sort=+project_name` - Sort by project name ascending (explicit)
+      schema:
+        type: string
+        enum:
+          - default
+          - +default
+          - -default
+          - project_name
+          - +project_name
+          - -project_name
+          - obs_count
+          - +obs_count
+          - -obs_count
+        default: default
+      example: -obs_count
+    num_taxa_ob:
+      name: num_taxa
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 5
+      description: |
+        Number of taxa to return per plot observation. Sort order depends on detail level:
+        - With `detail=minimal`: Descending order by max cover
+        - With `detail=full`: Alphabetical order by plant name
+    num_comms_ob:
+      name: num_comms
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 5
+      description: Number of communities to return per plot observation, ordered by commclass_id
+
+  responses:
+
+    InvalidParameters:
+      description: Invalid Parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/InvalidParameters"
+
+    UploadsNotAllowed:
+      description: Uploads not allowed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UploadsNotAllowed"
+
+    InvalidDataUpload:
+      description: Invalid data upload
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/InvalidDataUpload"
+
+    PlotObservations:
+      description: |
+        Matching plot observation(s), with fields based on parameters:
+        - `detail=geo`: Name, identifier, and lat/lon fields only
+        - `detail=minimal&with_nested=false`: Basic fields only
+        - `detail=minimal&with_nested=true`: Basic fields + nested array fields
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/plot_obs_geo'
+              - $ref: '#/components/schemas/plot_obs_minimal'
+              - $ref: '#/components/schemas/plot_obs_minimal_nested'
+              - $ref: '#/components/schemas/plot_obs_full'
+              - $ref: '#/components/schemas/plot_obs_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    CommunityConcepts:
+      description: |
+        Matching community concept(s), with fields based on parameters:
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/comm_concept_full'
+              - $ref: '#/components/schemas/comm_concept_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    CommunityClassifications:
+      description: |
+        Matching community classification(s), with fields based on parameters:
+        - `detail=minimal&with_nested=false`: Basic fields only
+        - `detail=minimal&with_nested=true`: Basic fields + nested array fields
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/comm_class_minimal'
+              - $ref: '#/components/schemas/comm_class_minimal_nested'
+              - $ref: '#/components/schemas/comm_class_full'
+              - $ref: '#/components/schemas/comm_class_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    CommunityInterpretations:
+      description: |
+        Matching community interpretation(s), with fields based on parameters:
+        - `detail=minimal&with_nested=false`: Basic fields only
+        - `detail=minimal&with_nested=true`: Basic fields + nested array fields
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/comm_interp_minimal'
+              - $ref: '#/components/schemas/comm_interp_minimal_nested'
+              - $ref: '#/components/schemas/comm_interp_full'
+              - $ref: '#/components/schemas/comm_interp_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    PlantConcepts:
+      description: |
+        Matching plant concept(s), with fields based on parameters:
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/plant_concept_full'
+              - $ref: '#/components/schemas/plant_concept_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    TaxonObservations:
+      description: |
+        Matching taxon observation(s), with fields based on parameters:
+        - `detail=minimal&with_nested=false`: Basic fields only
+        - `detail=minimal&with_nested=true`: Basic fields + nested array fields
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/taxon_obs_full'
+              - $ref: '#/components/schemas/taxon_obs_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    TaxonInterpretations:
+      description: |
+        Matching taxon interpretation(s), with fields based on parameters:
+        - `detail=minimal`: Basic fields only
+        - `detail=full`: Extended fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/taxon_interp_minimal'
+              - $ref: '#/components/schemas/taxon_interp_full'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    CoverMethods:
+      description: |
+        Matching cover method(s), with fields based on parameters:
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/cover_method_full'
+              - $ref: '#/components/schemas/cover_method_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    StratumMethods:
+      description: |
+        Matching stratum method(s), with fields based on parameters:
+        - `detail=full&with_nested=false`: Extended fields, no nested array fields
+        - `detail=full&with_nested=true`: Extended fields + nested array fields
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/stratum_method_full'
+              - $ref: '#/components/schemas/stratum_method_full_nested'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    Parties:
+      description: Matching party or parties
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/party'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    Projects:
+      description: Matching project(s)
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/project'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
+
+    References:
+      description: Matching reference(s)
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/reference'
+        application/vnd.apache.parquet:
+          schema:
+            type: string
+            format: binary
+            description: Parquet file with same data as the JSON response.
 
   schemas:
+
+    InvalidParameters:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Invalid vb code 'xx.1'."
+
+    UploadsNotAllowed:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "Uploads not allowed."
+
+    InvalidDataUpload:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: "An error occurred during upload: The following columns are not supported for stem data: foo."
 
     PlotObservationBase:
       type: object
@@ -1231,7 +1562,7 @@ components:
         confidentiality_status:
           type: integer
           description: "Are the data to be considered confidential? 0=no, 1= 1km radius, 2=10km radius, 3=100km radius, 4=location embargo, 5=public embargo on all plot data, 6=full embargo on all plot data. This applies also to region."
-          example: "exact location"
+          example: 0
         author_e:
           type: string
           description: "Original E-W coordinate as recorded by the author"
@@ -1369,12 +1700,12 @@ components:
           type: string
           format: date
           description: "The date of the observation, or the first day if the observation spanned more than one day."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         obs_end_date:
           type: string
           format: date
           description: "If the observation event spanned more than a single day, this is the last day on which observations were made."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         date_accuracy:
           type: string
           description: "Estimated accuracy of the observation date."
@@ -1383,7 +1714,7 @@ components:
           type: string
           format: date
           description: "Date that the observation was added to VegBank"
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         cm_code:
           type: string
           description: "VegBank cover method code referring to the scale used to estimate taxon cover. The database stores estimated cover to the nearest percent, but the conversion details are recovered by reference to the specific scale employed."
@@ -1393,7 +1724,7 @@ components:
           description: "Cover method name"
           example: "Percentage (%)"
         cover_dispersion:
-          type: integer
+          type: string
           description: "Were cover values for the total taxon list collected from one contiguous area or dispersed subplots?"
           example: "subplot-contiguous"
         auto_taxon_cover:
@@ -1844,31 +2175,83 @@ components:
                 example: "CEGL004549"
           description: "Community classifications"
 
+    record_count:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Total matching record count
+          example: 115000
+
     plot_obs_geo:
       allOf:
-        - $ref: '#/components/schemas/PlotObservationBase'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/PlotObservationBase'
+
     plot_obs_minimal:
       allOf:
-        - $ref: '#/components/schemas/PlotObservationBase'
-        - $ref: '#/components/schemas/PlotObservationMinimal'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/PlotObservationBase'
+                  - $ref: '#/components/schemas/PlotObservationMinimal'
+
     plot_obs_minimal_nested:
       allOf:
-        - $ref: '#/components/schemas/PlotObservationBase'
-        - $ref: '#/components/schemas/PlotObservationMinimal'
-        - $ref: '#/components/schemas/PlotObservationMinimalNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/PlotObservationBase'
+                  - $ref: '#/components/schemas/PlotObservationMinimal'
+                  - $ref: '#/components/schemas/PlotObservationMinimalNested'
+
     plot_obs_full:
       allOf:
-        - $ref: '#/components/schemas/PlotObservationBase'
-        - $ref: '#/components/schemas/PlotObservationMinimal'
-        - $ref: '#/components/schemas/PlotObservationFull'
-        - $ref: '#/components/schemas/StratumMethodBase'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/PlotObservationBase'
+                  - $ref: '#/components/schemas/PlotObservationMinimal'
+                  - $ref: '#/components/schemas/PlotObservationFull'
+                  - $ref: '#/components/schemas/StratumMethodBase'
+
     plot_obs_full_nested:
       allOf:
-        - $ref: '#/components/schemas/PlotObservationBase'
-        - $ref: '#/components/schemas/PlotObservationMinimal'
-        - $ref: '#/components/schemas/PlotObservationFull'
-        - $ref: '#/components/schemas/StratumMethodBase'
-        - $ref: '#/components/schemas/PlotObservationFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/PlotObservationBase'
+                  - $ref: '#/components/schemas/PlotObservationMinimal'
+                  - $ref: '#/components/schemas/PlotObservationFull'
+                  - $ref: '#/components/schemas/StratumMethodBase'
+                  - $ref: '#/components/schemas/PlotObservationFullNested'
 
     CommConceptFull:
       type: object
@@ -1921,12 +2304,12 @@ components:
           type: string
           format: date
           description: "Date for which the status assignment by the party started."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         stop_date:
           type: string
           format: date
           description: "Date for which the status assignment by the party ended."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         current_accepted:
           type: boolean
           description: "Is this concept currently accepted by at least one party?"
@@ -2008,11 +2391,28 @@ components:
 
     comm_concept_full:
       allOf:
-        - $ref: '#/components/schemas/CommConceptFull'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommConceptFull'
+
     comm_concept_full_nested:
       allOf:
-        - $ref: '#/components/schemas/CommConceptFull'
-        - $ref: '#/components/schemas/CommConceptFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommConceptFull'
+                  - $ref: '#/components/schemas/CommConceptFullNested'
 
     CommClassMinimal:
       type: object
@@ -2029,12 +2429,12 @@ components:
           type: string
           format: date
           description: "Start date for the application of a vegetation class to a plot observation by one or more parties."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         class_stop_date:
           type: string
           format: date
           description: "Stop date for the application of a vegetation class to a plot observation by one or more parties."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         inspection:
           type: boolean
           description: "Was the classification informed by simple inspection of data?"
@@ -2194,20 +2594,52 @@ components:
 
     comm_class_minimal:
       allOf:
-        - $ref: '#/components/schemas/CommClassMinimal'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommClassMinimal'
     comm_class_minimal_nested:
       allOf:
-        - $ref: '#/components/schemas/CommClassMinimal'
-        - $ref: '#/components/schemas/CommClassMinimalNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommClassMinimal'
+                  - $ref: '#/components/schemas/CommClassMinimalNested'
     comm_class_full:
       allOf:
-        - $ref: '#/components/schemas/CommClassMinimal'
-        - $ref: '#/components/schemas/CommClassFull'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommClassMinimal'
+                  - $ref: '#/components/schemas/CommClassFull'
     comm_class_full_nested:
       allOf:
-        - $ref: '#/components/schemas/CommClassMinimal'
-        - $ref: '#/components/schemas/CommClassFull'
-        - $ref: '#/components/schemas/CommClassFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommClassMinimal'
+                  - $ref: '#/components/schemas/CommClassFull'
+                  - $ref: '#/components/schemas/CommClassFullNested'
 
     CommInterpMinimal:
       type: object
@@ -2280,12 +2712,12 @@ components:
           type: string
           format: date
           description: "Start date for the application of a vegetation class to a plot observation by one or more parties."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         class_stop_date:
           type: string
           format: date
           description: "Stop date for the application of a vegetation class to a plot observation by one or more parties."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         inspection:
           type: boolean
           description: "Was the classification informed by simple inspection of data?"
@@ -2337,19 +2769,51 @@ components:
 
     comm_interp_minimal:
       allOf:
-        - $ref: '#/components/schemas/CommInterpMinimal'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommInterpMinimal'
     comm_interp_minimal_nested:
       allOf:
-        - $ref: '#/components/schemas/CommInterpMinimal'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommInterpMinimal'
     comm_interp_full:
       allOf:
-        - $ref: '#/components/schemas/CommInterpMinimal'
-        - $ref: '#/components/schemas/CommInterpFull'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommInterpMinimal'
+                  - $ref: '#/components/schemas/CommInterpFull'
     comm_interp_full_nested:
       allOf:
-        - $ref: '#/components/schemas/CommInterpMinimal'
-        - $ref: '#/components/schemas/CommInterpFull'
-        - $ref: '#/components/schemas/CommInterpFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CommInterpMinimal'
+                  - $ref: '#/components/schemas/CommInterpFull'
+                  - $ref: '#/components/schemas/CommInterpFullNested'
 
     PlantConceptFull:
       type: object
@@ -2402,12 +2866,12 @@ components:
           type: string
           format: date
           description: "Date for which the status assignment by the party started."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         stop_date:
           type: string
           format: date
           description: "Date for which the status assignment by the party ended."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         current_accepted:
           type: boolean
           description: "Is this concept currently accepted by at least one party?"
@@ -2489,11 +2953,28 @@ components:
 
     plant_concept_full:
       allOf:
-        - $ref: '#/components/schemas/PlantConceptFull'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/PlantConceptFull'
+
     plant_concept_full_nested:
       allOf:
-        - $ref: '#/components/schemas/PlantConceptFull'
-        - $ref: '#/components/schemas/PlantConceptFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/PlantConceptFull'
+                  - $ref: '#/components/schemas/PlantConceptFullNested'
 
     TaxonObsFull:
       type: object
@@ -2622,11 +3103,27 @@ components:
 
     taxon_obs_full:
       allOf:
-        - $ref: '#/components/schemas/TaxonObsFull'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/TaxonObsFull'
     taxon_obs_full_nested:
       allOf:
-        - $ref: '#/components/schemas/TaxonObsFull'
-        - $ref: '#/components/schemas/TaxonObsFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/TaxonObsFull'
+                  - $ref: '#/components/schemas/TaxonObsFullNested'
 
     TaxonInterpMinimal:
       type: object
@@ -2647,7 +3144,7 @@ components:
           type: string
           format: date
           description: "Date when the interpretation was made."
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         interpretation_type:
           type: string
           description: "Categories for the interpretation (e.g.,  uthor, computer generated, simplified for comparative analysis, correction, finer resolution)"
@@ -2743,11 +3240,27 @@ components:
 
     taxon_interp_minimal:
       allOf:
-        - $ref: '#/components/schemas/TaxonInterpMinimal'
+      - $ref: '#/components/schemas/record_count'
+      - type: object
+        properties:
+          data:
+            description: Data records
+            type: array
+            items:
+              allOf:
+                - $ref: '#/components/schemas/TaxonInterpMinimal'
     taxon_interp_full:
       allOf:
-        - $ref: '#/components/schemas/TaxonInterpMinimal'
-        - $ref: '#/components/schemas/TaxonInterpFull'
+      - $ref: '#/components/schemas/record_count'
+      - type: object
+        properties:
+          data:
+            description: Data records
+            type: array
+            items:
+              allOf:
+                - $ref: '#/components/schemas/TaxonInterpMinimal'
+                - $ref: '#/components/schemas/TaxonInterpFull'
 
     CoverMethodFull:
       type: object
@@ -2788,7 +3301,7 @@ components:
               cover_code:
                 type: string
                 description: "Name or label used in the cover class scale for this specific cover class."
-                example: 2
+                example: "2"
               lower_limit:
                 type: number
                 format: float
@@ -2811,11 +3324,27 @@ components:
 
     cover_method_full:
       allOf:
-        - $ref: '#/components/schemas/CoverMethodFull'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CoverMethodFull'
     cover_method_full_nested:
       allOf:
-        - $ref: '#/components/schemas/CoverMethodFull'
-        - $ref: '#/components/schemas/CoverMethodFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/CoverMethodFull'
+                  - $ref: '#/components/schemas/CoverMethodFullNested'
 
     StratumMethodBase:
       type: object
@@ -2876,13 +3405,29 @@ components:
 
     stratum_method_full:
       allOf:
-        - $ref: '#/components/schemas/StratumMethodBase'
-        - $ref: '#/components/schemas/StratumMethodFull'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/StratumMethodBase'
+                  - $ref: '#/components/schemas/StratumMethodFull'
     stratum_method_full_nested:
       allOf:
-        - $ref: '#/components/schemas/StratumMethodBase'
-        - $ref: '#/components/schemas/StratumMethodFull'
-        - $ref: '#/components/schemas/StratumMethodFullNested'
+        - $ref: '#/components/schemas/record_count'
+        - type: object
+          properties:
+            data:
+              description: Data records
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/StratumMethodBase'
+                  - $ref: '#/components/schemas/StratumMethodFull'
+                  - $ref: '#/components/schemas/StratumMethodFullNested'
 
     Party:
       type: object
@@ -2946,12 +3491,12 @@ components:
           type: string
           format: date
           description: "Project start date"
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         stop_date:
           type: string
           format: date
           description: "Project stop date"
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
         obs_count:
           type: integer
           description: "Number of plot observations associated with this entity"
@@ -2960,7 +3505,7 @@ components:
           type: string
           format: date
           description: "Date a plot observation was last added to this project"
-          example: "2006-05-30 07:00:00"
+          example: "2006-05-30"
 
     project:
       $ref: '#/components/schemas/Project'
@@ -3059,12 +3604,12 @@ components:
           type: number
           format: float
           description: "Average height of the bottom of the stratum in meters"
-          example: #TODO
+          example: 0.1
         stratum_height:
           type: number
           format: float
           description: "Tallest part of the Stratum in meters."
-          example: #TODO
+          example: 1.0
 
     disturbance_obs:
       type: object

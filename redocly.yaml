@@ -25,6 +25,6 @@ openapi:
   hideDownloadButton: true
   hideLoading: false
   expandResponses: "200,201"
-  jsonSampleExpandLevel: 2
+  jsonSampleExpandLevel: 5
   schemaExpansionLevel: 2
   showExtensions: true
