@@ -46,8 +46,7 @@ paths:
       operationId: get-ob-by-id
       summary: Get plot observation
       description: >
-        Retrieve a single plot observation using its `ob_code`, which
-        take the form `ob.<number>`.
+        Retrieve a single plot observation using its `ob_code`.
       parameters:
         - name: ob_code
           in: path
@@ -70,8 +69,8 @@ paths:
       operationId: get-ob-by-pj
       summary: Get plot observations by project
       description: >
-        Retrieve a paginated and sorted collection of plot observations,
-        either representing all plot observations associated with the
+        Retrieve a paginated and sorted collection of plot observations
+        representing all plot observations associated with the
         specified project (using its `pj_code`), or a subset thereof
         based on a specified `search` query.
       parameters:
@@ -102,8 +101,8 @@ paths:
       operationId: get-ob-by-py
       summary: Get plot observations by party
       description: >
-        Retrieve a paginated and sorted collection of plot observations,
-        either representing all plot observations associated with the
+        Retrieve a paginated and sorted collection of plot observations
+        representing all plot observations associated with the
         specified party (using its `py_code`), or a subset thereof
         based on a specified `search` query.
       parameters:
@@ -134,11 +133,11 @@ paths:
       operationId: get-ob-by-pc
       summary: Get plot observations by plant concept
       description: >
-        Retrieve a paginated and sorted collection of plot observations,
-        either representing all plot observations with taxon
-        observations interpreted to the specified plant concept (using
-        its `pc_code`), or a subset thereof based on a specified
-        `search` query.
+        Retrieve a paginated and sorted collection of plot observations
+        representing all plot observations with taxon observations
+        interpreted to the specified plant concept (using its
+        `pc_code`), or a subset thereof based on a specified `search`
+        query.
       parameters:
         - name: pc_code
           in: path
@@ -167,11 +166,11 @@ paths:
       operationId: get-ob-by-cc
       summary: Get plot observations by community concept
       description: >
-        Retrieve a paginated and sorted collection of plot observations,
-        either representing all plot observations with taxon
-        observations interpreted to the specified community concept (using
-        its `cc_code`), or a subset thereof based on a specified
-        `search` query.
+        Retrieve a paginated and sorted collection of plot observations
+        representing all plot observations with taxon observations
+        interpreted to the specified community concept (using its
+        `cc_code`), or a subset thereof based on a specified `search`
+        query.
       parameters:
         - name: cc_code
           in: path
@@ -200,10 +199,10 @@ paths:
       operationId: get-ob-by-cm
       summary: Get plot observations by cover method
       description: >
-        Retrieve a paginated and sorted collection of plot observations,
-        either representing all plot observations using the specified
-        cover method (using its `cm_code`), or a subset thereof based on
-        a specified `search` query.
+        Retrieve a paginated and sorted collection of plot observations
+        representing all plot observations using the specified cover
+        method (using its `cm_code`), or a subset thereof based on a
+        specified `search` query.
       parameters:
         - name: cm_code
           in: path
@@ -232,10 +231,10 @@ paths:
       operationId: get-ob-by-sm
       summary: Get plot observations by stratum method
       description: >
-        Retrieve a paginated and sorted collection of plot observations,
-        either representing all plot observations using the specified
-        stratum method (using its `sm_code`), or a subset thereof based on
-        a specified `search` query.
+        Retrieve a paginated and sorted collection of plot observations
+        representing all plot observations using the specified stratum
+        method (using its `sm_code`), or a subset thereof based on a
+        specified `search` query.
       parameters:
         - name: sm_code
           in: path
@@ -264,8 +263,8 @@ paths:
       operationId: get-ob
       summary: Get all plot observations
       description: >
-        Retrieve a paginated and sorted collection of plot observations,
-        either representing all plot observations in VegBank, or a subset
+        Retrieve a paginated and sorted collection of plot observations
+        representing all plot observations in VegBank, or a subset
         thereof based on a specified `search` query.
       parameters:
         - $ref: '#/components/parameters/search'
@@ -310,14 +309,16 @@ paths:
         '500':
           $ref: "#/components/responses/InvalidDataUpload"
 
-  /community-concepts/{vb_code}:
+  /community-concepts/{cc_code}:
     get:
       tags:
         - Community concepts
       operationId: get-cc-by-id
-      summary: Get a community concept via its identifier
+      summary: Get community concept
+      description: >
+        Retrieve a single community concept using its `cc_code`.
       parameters:
-        - name: vb_code
+        - name: cc_code
           in: path
           required: true
           schema:
@@ -330,12 +331,74 @@ paths:
           $ref: "#/components/responses/CommunityConcepts"
         '400':
           $ref: "#/components/responses/InvalidParameters"
+  /community-classifications/{cl_code}/community-concepts:
+    get:
+      tags:
+        - Community concepts
+      operationId: get-cc-by-cl
+      summary: Get community concepts by cl
+      description: >
+        Retrieve a paginated and sorted collection of community concepts
+        representing all concepts interpreted under the specified
+        community classification (using its `cl_code`), or a subset
+        thereof based on a specified `search` query.
+      parameters:
+        - name: cl_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "cl.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/CommunityConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plot-observations/{ob_code}/community-concepts:
+    get:
+      tags:
+        - Community concepts
+      operationId: get-cc-by-ob
+      summary: Get community concepts by ob
+      description: >
+        Retrieve a paginated and sorted collection of community concepts
+        representing all concepts associated with the specified plot
+        observation (using its `ob_code`), or a subset thereof based on
+        a specified `search` query.
+      parameters:
+        - name: ob_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ob.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/CommunityConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /community-concepts:
     get:
       tags:
         - Community concepts
       operationId: get-cc
-      summary: Get multiple community concepts
+      summary: Get all community concepts
+      description: >
+        Retrieve a paginated and sorted collection of community concepts
+        representing all concepts stored in VegBank, or a subset thereof
+        based on a specified `search` query.
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/with_nested'
@@ -376,14 +439,16 @@ paths:
         '500':
           $ref: "#/components/responses/InvalidDataUpload"
 
-  /community-classifications/{vb_code}:
+  /community-classifications/{cl_code}:
     get:
       tags:
         - Community classifications
       operationId: get-cl-by-id
-      summary: Get a community classification via its identifier
+      summary: Get community classification
+      description: >
+        Retrieve a single community classification using its `cl_code`.
       parameters:
-        - name: vb_code
+        - name: cl_code
           in: path
           required: true
           schema:
@@ -397,12 +462,70 @@ paths:
           $ref: "#/components/responses/CommunityClassifications"
         '400':
           $ref: "#/components/responses/InvalidParameters"
+  /community-concepts/{cc_code}/community-classifications:
+    get:
+      tags:
+        - Community classifications
+      operationId: get-cl-by-cc
+      summary: Get community classifications by cc
+      description: >
+        Retrieve a paginated collection of community classifications
+        using the specified community concept (using its `cc_code`).
+      parameters:
+        - name: cc_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "cc.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/CommunityClassifications"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plot-observations/{ob_code}/community-classifications:
+    get:
+      tags:
+        - Community classifications
+      operationId: get-cl-by-ob
+      summary: Get community classifications by ob
+      description: >
+        Retrieve a paginated collection of community classifications
+        associated with the specified plot observation (using its
+        `ob_code`).
+      parameters:
+        - name: ob_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ob.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/CommunityClassifications"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /community-classifications:
     get:
       tags:
         - Community classifications
       operationId: get-cl
-      summary: Get multiple community classifications
+      summary: Get all community classifications
+      description: >
+        Retrieve a paginated collection of all community classifications
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
@@ -415,14 +538,16 @@ paths:
         '400':
           $ref: "#/components/responses/InvalidParameters"
 
-  /community-interpretations/{vb_code}:
+  /community-interpretations/{ci_code}:
     get:
       tags:
         - Community interpretations
       operationId: get-ci-by-id
-      summary: Get a community interpretation via its identifier
+      summary: Get community interpretation
+      description: >
+        Retrieve a single community interpretation using its `ci_code`.
       parameters:
-        - name: vb_code
+        - name: ci_code
           in: path
           required: true
           schema:
@@ -436,12 +561,98 @@ paths:
           $ref: "#/components/responses/CommunityInterpretations"
         '400':
           $ref: "#/components/responses/InvalidParameters"
+  /community-classifications/{cl_code}/community-interpretations:
+    get:
+      tags:
+        - Community interpretations
+      operationId: get-ci-by-cl
+      summary: Get community interpretations by cl
+      description: >
+        Retrieve a paginated collection of community interpretations
+        associated with the specified community classification (using
+        its `cl_code`).
+      parameters:
+        - name: cl_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "cl.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/CommunityInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plot-observations/{ob_code}/community-interpretations:
+    get:
+      tags:
+        - Community interpretations
+      operationId: get-ci-by-ob
+      summary: Get community interpretations by ob
+      description: >
+        Retrieve a paginated collection of community interpretations
+        associated with the specified plot observation (using its
+        `ob_code`).
+      parameters:
+        - name: ob_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ob.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/CommunityInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /community-concepts/{cc_code}/community-interpretations:
+    get:
+      tags:
+        - Community interpretations
+      operationId: get-ci-by-cc
+      summary: Get community interpretations by cc
+      description: >
+        Retrieve a paginated collection of community interpretations
+        using the specified community concept (using its `cc_code`).
+      parameters:
+        - name: cc_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "cc.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/CommunityInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /community-interpretations:
     get:
       tags:
         - Community interpretations
       operationId: get-ci
-      summary: Get multiple community interpretations
+      summary: Get all community interpretations
+      description: >
+        Retrieve a paginated collection of all community interpretations
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
@@ -454,14 +665,16 @@ paths:
         '400':
           $ref: "#/components/responses/InvalidParameters"
 
-  /plant-concepts/{vb_code}:
+  /plant-concepts/{pc_code}:
     get:
       tags:
         - Plant concepts
       operationId: get-pc-by-id
-      summary: Get a plant concept via its identifier
+      summary: Get plant concept
+      description: >
+        Retrieve a single plant concept using its `pc_code`.
       parameters:
-        - name: vb_code
+        - name: pc_code
           in: path
           required: true
           schema:
@@ -474,12 +687,74 @@ paths:
           $ref: "#/components/responses/PlantConcepts"
         '400':
           $ref: "#/components/responses/InvalidParameters"
+  /taxon-observations/{to_code}/plant-concepts:
+    get:
+      tags:
+        - Plant concepts
+      operationId: get-pc-by-to
+      summary: Get plant concepts by to
+      description: >
+        Retrieve a paginated and sorted collection of the plant concepts
+        applied via interpretation to the specified taxon observation
+        (using its `to_code`), or a subset thereof based on a specified
+        `search` query.
+      parameters:
+        - name: to_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "to.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_pc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlantConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plot-observations/{ob_code}/plant-concepts:
+    get:
+      tags:
+        - Plant concepts
+      operationId: get-pc-by-ob
+      summary: Get plant concepts by ob
+      description: >
+        Retrieve a paginated and sorted collection of all plant concepts
+        associated with the specified plot observation (using its
+        `ob_code`), or a subset thereof based on a specified `search`
+        query.
+      parameters:
+        - name: ob_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ob.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_pc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/PlantConcepts"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /plant-concepts:
     get:
       tags:
         - Plant concepts
       operationId: get-pc
-      summary: Get multiple plant concepts
+      summary: Get all plant concepts
+      description: >
+        Retrieve a paginated and sorted collection of plant concepts
+        representing all concepts stored in VegBank, or a subset thereof
+        based on a specified `search` query.
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/with_nested'
@@ -520,14 +795,16 @@ paths:
         '500':
           $ref: "#/components/responses/InvalidDataUpload"
 
-  /taxon-observations/{vb_code}:
+  /taxon-observations/{to_code}:
     get:
       tags:
         - Taxon observations
       operationId: get-to-by-id
-      summary: Get a taxon observation via its identifier
+      summary: Get taxon observation
+      description: >
+        Retrieve a single taxon observation using its `to_code`.
       parameters:
-        - name: vb_code
+        - name: to_code
           in: path
           required: true
           schema:
@@ -540,12 +817,67 @@ paths:
           $ref: "#/components/responses/TaxonObservations"
         '400':
           $ref: "#/components/responses/InvalidParameters"
+  /plot-observations/{ob_code}/taxon-observations:
+    get:
+      tags:
+        - Taxon observations
+      operationId: get-to-by-ob
+      summary: Get taxon observations by ob
+      description: >
+        Retrieve a paginated collection of taxon observations
+        associated with the specified plot observation (using its
+        `ob_code`).
+      parameters:
+        - name: ob_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ob.1"
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/TaxonObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plant-concepts/{pc_code}/taxon-observations:
+    get:
+      tags:
+        - Taxon observations
+      operationId: get-to-by-pc
+      summary: Get taxon observations by pc
+      description: >
+        Retrieve a paginated collection of taxon observations
+        interpreted to the specified plant concept (using its
+        `pc_code`).
+      parameters:
+        - name: pc_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "pc.1"
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/TaxonObservations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /taxon-observations:
     get:
       tags:
         - Taxon observations
       operationId: get-to
-      summary: Get multiple taxon observations
+      summary: Get all taxon observations
+      description: >
+        Retrieve a paginated collection of all taxon observations
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/limit'
@@ -557,14 +889,16 @@ paths:
         '400':
           $ref: "#/components/responses/InvalidParameters"
 
-  /taxon-interpretations/{vb_code}:
+  /taxon-interpretations/{ti_code}:
     get:
       tags:
         - Taxon interpretations
       operationId: get-ti-by-id
-      summary: Get a taxon interpretation via its identifier
+      summary: Get taxon interpretation
+      description: >
+        Retrieve a single taxon interpretation using its `ti_code`.
       parameters:
-        - name: vb_code
+        - name: ti_code
           in: path
           required: true
           schema:
@@ -577,12 +911,93 @@ paths:
           $ref: "#/components/responses/TaxonInterpretations"
         '400':
           $ref: "#/components/responses/InvalidParameters"
+  /plant-concepts/{pc_code}/taxon-interpretations:
+    get:
+      tags:
+        - Taxon interpretations
+      operationId: get-ti-by-pc
+      summary: Get taxon interpretations by pc
+      description: >
+        Retrieve a paginated collection of taxon interpretations
+        using the specified plant concept (using its `pc_code`).
+      parameters:
+        - name: pc_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "pc.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/with_nested'
+        - $ref: '#/components/parameters/sort_cc'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/TaxonInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /plot-observations/{ob_code}/taxon-interpretations:
+    get:
+      tags:
+        - Taxon interpretations
+      operationId: get-ti-by-ob
+      summary: Get taxon interpretations by ob
+      description: >
+        Retrieve a paginated collection of taxon interpretations
+        applied to taxa observed in the specified plot observation
+        (using its `ob_code`).
+      parameters:
+        - name: ob_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ob.1"
+        - $ref: '#/components/parameters/detail'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/TaxonInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /taxon-observations/{to_code}/taxon-interpretations:
+    get:
+      tags:
+        - Taxon interpretations
+      operationId: get-ti-by-to
+      summary: Get taxon interpretations by to
+      description: >
+        Retrieve a paginated collection of taxon interpretations
+        for the specified taxon observation (using its `to_code`).
+      parameters:
+        - name: to_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "to.1"
+        - $ref: '#/components/parameters/detail'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/TaxonInterpretations"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /taxon-interpretations:
     get:
       tags:
         - Taxon interpretations
       operationId: get-ti
-      summary: Get multiple taxon interpretations
+      summary: Get all taxon interpretations
+      description: >
+        Retrieve a paginated collection of all taxon interpretations
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/limit'
@@ -594,14 +1009,16 @@ paths:
         '400':
           $ref: "#/components/responses/InvalidParameters"
 
-  /cover-methods/{vb_code}:
+  /cover-methods/{cm_code}:
     get:
       tags:
         - Cover methods
       operationId: get-cm-by-id
-      summary: Get a cover method via its identifier
+      summary: Get cover method
+      description: >
+        Retrieve a single cover method using its `cm_code`.
       parameters:
-        - name: vb_code
+        - name: cm_code
           in: path
           required: true
           schema:
@@ -619,7 +1036,10 @@ paths:
       tags:
         - Cover methods
       operationId: get-cm
-      summary: Get multiple cover methods
+      summary: Get all cover methods
+      description: >
+        Retrieve a paginated collection of all cover methods
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/limit'
@@ -658,14 +1078,16 @@ paths:
         '500':
           $ref: "#/components/responses/InvalidDataUpload"
 
-  /stratum-methods/{vb_code}:
+  /stratum-methods/{sm_code}:
     get:
       tags:
         - Stratum methods
       operationId: get-sm-by-id
-      summary: Get a stratum method via its identifier
+      summary: Get stratum method
+      description: >
+        Retrieve a single stratum method using its `sm_code`.
       parameters:
-        - name: vb_code
+        - name: sm_code
           in: path
           required: true
           schema:
@@ -683,7 +1105,10 @@ paths:
       tags:
         - Stratum methods
       operationId: get-sm
-      summary: Get multiple stratum methods
+      summary: Get all stratum methods
+      description: >
+        Retrieve a paginated collection of all stratum methods
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/with_nested'
         - $ref: '#/components/parameters/limit'
@@ -722,14 +1147,16 @@ paths:
         '500':
           $ref: "#/components/responses/InvalidDataUpload"
 
-  /parties/{vb_code}:
+  /parties/{py_code}:
     get:
       tags:
         - Parties
       operationId: get-py-by-id
-      summary: Get a party via its identifier
+      summary: Get party
+      description: >
+        Retrieve a single party using its `py_code`.
       parameters:
-        - name: vb_code
+        - name: py_code
           in: path
           required: true
           schema:
@@ -741,12 +1168,97 @@ paths:
           $ref: "#/components/responses/Parties"
         '400':
           $ref: "#/components/responses/InvalidParameters"
+  /plot-observations/{ob_code}/parties:
+    get:
+      tags:
+        - Parties
+      operationId: get-py-by-ob
+      summary: Get parties by ob
+      description: >
+        Retrieve a paginated and sorted collection of parties associated
+        with the specified plot observation (using its `ob_code`), or a
+        subset thereof based on a specified `search` query.
+      parameters:
+        - name: ob_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ob.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/sort_py'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/Parties"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /community-classifications/{cl_code}/parties:
+    get:
+      tags:
+        - Parties
+      operationId: get-py-by-cl
+      summary: Get parties by cl
+      description: >
+        Retrieve a paginated and sorted collection of parties associated
+        with the specified community classification (using its
+        `cl_code`), or a subset thereof based on a specified `search`
+        query.
+      parameters:
+        - name: cl_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "cl.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/sort_py'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/Parties"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
+  /projects/{pj_code}/parties:
+    get:
+      tags:
+        - Parties
+      operationId: get-py-by-pj
+      summary: Get parties by pj
+      description: >
+        Retrieve a paginated and sorted collection of parties associated
+        with the specified project (using its `pj_code`), or a subset
+        thereof based on a specified `search` query.
+      parameters:
+        - name: pj_code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "pj.1"
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/sort_py'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/create_parquet'
+      responses:
+        '200':
+          $ref: "#/components/responses/Parties"
+        '400':
+          $ref: "#/components/responses/InvalidParameters"
   /parties:
     get:
       tags:
         - Parties
       operationId: get-py
-      summary: Get multiple parties
+      summary: Get all parties
+      description: >
+        Retrieve a paginated collection of all parties
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/sort_py'
@@ -786,14 +1298,16 @@ paths:
         '500':
           $ref: "#/components/responses/InvalidDataUpload"
 
-  /projects/{vb_code}:
+  /projects/{pj_code}:
     get:
       tags:
         - Projects
       operationId: get-pj-by-id
-      summary: Get a project via its identifier
+      summary: Get project
+      description: >
+        Retrieve a single project using its `pj_code`.
       parameters:
-        - name: vb_code
+        - name: pj_code
           in: path
           required: true
           schema:
@@ -811,7 +1325,10 @@ paths:
       tags:
         - Projects
       operationId: get-pj
-      summary: Get multiple projects
+      summary: Get all projects
+      description: >
+        Retrieve a paginated collection of all projects
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/sort_pj'
@@ -851,14 +1368,16 @@ paths:
         '500':
           $ref: "#/components/responses/InvalidDataUpload"
 
-  /references/{vb_code}:
+  /references/{rf_code}:
     get:
       tags:
         - References
       operationId: get-rf-by-id
-      summary: Get a reference via its identifier
+      summary: Get reference
+      description: >
+        Retrieve a single reference using its `rf_code`.
       parameters:
-        - name: vb_code
+        - name: rf_code
           in: path
           required: true
           schema:
@@ -876,7 +1395,10 @@ paths:
       tags:
         - References
       operationId: get-rf
-      summary: Get multiple references
+      summary: Get all references
+      description: >
+        Retrieve a paginated collection of all references
+        recorded in VegBank.
       parameters:
         - $ref: '#/components/parameters/search'
         - $ref: '#/components/parameters/limit'
