@@ -4,7 +4,36 @@ info:
   version: '2.0.0-beta'
   license:
     name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0
+  x-logo:
+    url: './assets/vegbank-logo.png'
+    altText: VegBank logo
+  description: |
+    Welcome to the official documentation for the VegBank REST API. You
+    can find out more about VegBank at https://github.com/NCEAS/vegbank2.
+
+    ### Introduction
+    The [VegBank](http://vegbank.org) data system provides a community
+    managed data portal for vegetation data, particularly plots, plant
+    taxonomy, and communities. Developed, maintained, and operated by
+    the National Center for Ecological Analysis and Synthesis (NCEAS),
+    VegBank is a product of the Ecological Society of America (ESA)
+    Vegetation Panel, and is affiliated with the National Vegetation
+    Classification (USNVC).
+
+    VegBank provides a common storage system and web portal for accessing:
+    - Plot data
+    - Plant taxonomy data
+    - Community data
+
+    VegBank is an open source, community project. We [welcome
+    contributions](https://github.com/NCEAS/vegbank2/blob/develop/CONTRIBUTING.md)
+    in many forms, including code, graphics, documentation, bug reports,
+    testing, etc.
+
+    Use the [VegBank
+    discussions](https://github.com/NCEAS/vegbank2/discussions) to
+    ask questions, raise issues, or discuss contributions with us.
+
 servers:
   - url: https://api.vegbank.org
     description: VegBank Production API
@@ -303,7 +332,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -433,7 +462,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -578,9 +607,8 @@ paths:
           schema:
             type: string
           example: "cl.1"
-        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
-        - $ref: '#/components/parameters/sort_cc'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
@@ -606,9 +634,8 @@ paths:
           schema:
             type: string
           example: "ob.1"
-        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
-        - $ref: '#/components/parameters/sort_cc'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
@@ -633,9 +660,8 @@ paths:
           schema:
             type: string
           example: "cc.1"
-        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/detail'
         - $ref: '#/components/parameters/with_nested'
-        - $ref: '#/components/parameters/sort_cc'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/create_parquet'
@@ -789,7 +815,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -1072,7 +1098,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -1141,7 +1167,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -1292,7 +1318,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -1362,7 +1388,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -1431,7 +1457,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  description: accession codes for the new created records
+                  description: counts and vb_codes of newly created records
         '403':
           $ref: "#/components/responses/UploadsNotAllowed"
         '500':
@@ -4152,30 +4178,6 @@ components:
           type: string
         accession_code:
           type: string
-
-    plant_name:
-      type: object
-      properties:
-        plant_name:
-          type: string
-        reference:
-          type: object
-          $ref: "#/components/schemas/reference"
-        date_entered:
-          type: number
-          format: date
-
-    community_name:
-      type: object
-      properties:
-        community_name:
-          type: string
-        reference:
-          type: object
-          $ref: "#/components/schemas/reference"
-        date_entered:
-          type: string
-          format: date
 
     reference_party:
       type: object

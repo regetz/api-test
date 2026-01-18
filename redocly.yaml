@@ -1,13 +1,15 @@
 apis:
   main:
-    root: api/openapi.yml
+    root: ./api/openapi.yml
 
 extends:
   - recommended
 
 logo:
-  image: ./assets/logo_vegbank_leaves.svg
+  image: ./assets/vegbank-logo.png
   altText: VegBank API
+  link: "https://github.com/NCEAS/vegbank2"
+  favicon: ./assets/vegbank-favicon.svg
 
 openapi:
   theme:

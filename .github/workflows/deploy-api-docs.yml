@@ -35,7 +35,6 @@ jobs:
       - name: Build API docs (HTML)
         run: npx @redocly/cli build-docs api/openapi.yml --output public/api/index.html
 
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
